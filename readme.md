@@ -1,65 +1,53 @@
-# Предксказание месячных трат пользователей по категориям.
+# Monthly user costs prediction.
 
 ## Описание данных
-- data_train_transactions.csv - покупки клиентов за 2019 год
-	- party_rk - уникальный id клиента
-	- account_rk - уникальный id счёта
-	- transaction_dttm - дата покупки
-	- transaction_amt_rur - сумма покупки в рублях
+- data_train_transactions.csv - client's costs 2019
+	- party_rk - unique client id
+	- account_rk - account id
+	- transaction_dttm - cost date
+	- transaction_amt_rur - sum in rubles 
 	- category - категория траты
-- data_test_transactions.csv - покупки клиентов за январь 2020 года. Для тестирования модели.
-- data_party_x_socdem.csv - социально-демографические характеристики клиентов
-- data_story_logs.csv - история взаимодействия клиентов с "историями" в приложении банка (лайки, дизлайки). 
-	- party_rk - id клиента
-	- date_time - дата взаимодействия
-	- story_id - уникальный id истории
-	- event - реакция клиента на историю (лайк, дизлайк)
-- data_story_texts.csv - содержит тексты с историй
-	- story_id - уникальный id истории (для матчинга с data_story_logs)
-	- name - название истории
-	- story_text - текст истории
+- data_test_transactions.csv - client's costs january 2020. For validation.
+- data_party_x_socdem.csv - socio-demographic characteristics of clients
+- data_story_logs.csv - history of customer interaction with "stories" in the bank application (likes, dislikes).
+	- party_rk - unique client id
+	- date_time - date of interaction
+	- story_id - unique id of story
+	- event - customer reaction to the story (like, dislike)
+- data_story_texts.csv - contains texts from stories
+	- story_id - unique story id 
+	- name - story name
+	- story_text - story text
 
 
-Данные в исходном виде находятся в папке `data/raw_data`
+The raw data located in `data/raw_data`
 
-## Метрика
-Для оценки качества выбрана метрика попадания в +-N% от реальных затрат, по умолчанию использовал 20%. Так же, как альтернативная метика, и loss для обучения, использовалась MAE.
-Достиг лучшего значения метрики 73% попаданий в +-20% от реальных расходов.
+## Metric
+As metric have choosen accuracy to +-N% from real costs, by default I used 20%. Also as alternative metric and loss training GB I used MAE.
 
-## Использование
-Скрипт выполняет подготовку данных к обучению, обучение модели, валидацию, сохранение модели и конвертацию в ONNX.
+## Usage
+The script performs data preparation for training, model training, validation, model saving and conversion to ONNX.
 
-Параметры скрипта находятся в `/configs/config.cfg`
-В конфиге два модудя, **data** и **train** , data отвечает за подготовку данных и сохранение их, если нужно. Train за обучение модели.
+Parameters in  `/configs/config.cfg`
+Two modules in config, **data** и **train** , data for data preparation and saving. Train for model's training.
 ### data
-* **socdem, story_logs, story_texts, train_tr, test_tr** - пути к соответствующим csv файлам (str)
-* **use_texts** - использовать ли текстовые данные (bool)
-* **save_prepared** - сохранить ли данные после препроцессинга (bool). Сохранение в папку `/data/processed_data`
-* **load_prepared** - использовать ли сохраненные данные (bool). Тогда препроцессинг выполняться не будет
+* **socdem, story_logs, story_texts, train_tr, test_tr** - path to csv file (str)
+* **use_texts** - use text data (bool)
+* **save_prepared** - save data after preprocessing (bool). Saving to `/data/processed_data`
+* **load_prepared** - use preprocessed data (bool)
 
 ### train
-* **num_iterations** - количество итераций перебора для подбора параметров в optuna (int)
-* **main_metric** - метрика, по которой будут оптимизироваться параметры. (**accuracy** or **mae**) (str)
-* **convert_to_onnx** - переводить ли модель в ONNX (bool)
-* **n_estimators** - количество деревьев в бустинге, в финальной модели будет n_estimators * 3 (int)
-* **metric_thres** - порог для метрики accuracy (float)
+* **num_iterations** - number of iterations for selection of parameters in optuna (int)
+* **main_metric** - optimization metric. (**accuracy** or **mae**) (str)
+* **convert_to_onnx** - convert to ONNX (bool)
+* **n_estimators** - GB model number of estimators, final model be n_estimators * 3 (int)
+* **metric_thres** - N/100 for accuracy metric (float)
 
-### Запуск
+### Run
 * `pip install -r requirements.txt`
 * `python3 run.py -c ./configs/config.cfg -v 1`
          
-В скрипт передаётся путь к конфигу (обязательный параметр) и параметр verbose -v, 1 - будет выводить принты в ходе процесса, 0 - скроет. Не обязательный параметр, по умолчанию 1.
+The path to the config is passed to the script (required parameter) and the verbose -v parameter, 1 - will display prints during the process, 0 - will hide them. Not required parameter, default 1.
 
-Модели сохранятся в папку `/models`
+Models saves to `/models`
 
-Если нужно использовать подготовленные данные, то предварительно запустить скрипт 
-
-`python unzip_data.py`
-
-
-### Предварительный анализ и визуализации в jupyter notebook'e vtb.ipynb
-
-### Что можно улучшить?
-* Лучше подобрать пороги для удаления выбросов
-* Бороться с нулевыми значениями, помимо маскирования
-* Сбор большего количества текстовых данных для моделей классификации на "продающие"/"не продающие" истории
