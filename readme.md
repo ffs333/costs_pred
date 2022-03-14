@@ -1,6 +1,6 @@
 # Monthly user costs prediction.
 
-## Описание данных
+## Data Description
 - data_train_transactions.csv - client's costs 2019
 	- party_rk - unique client id
 	- account_rk - account id
@@ -30,13 +30,13 @@ The script performs data preparation for training, model training, validation, m
 
 Parameters in  `/configs/config.cfg`
 Two modules in config, **data** и **train** , data for data preparation and saving. Train for model's training.
-### data
+### Data
 * **socdem, story_logs, story_texts, train_tr, test_tr** - path to csv file (str)
 * **use_texts** - use text data (bool)
 * **save_prepared** - save data after preprocessing (bool). Saving to `/data/processed_data`
 * **load_prepared** - use preprocessed data (bool)
 
-### train
+### Train
 * **num_iterations** - number of iterations for selection of parameters in optuna (int)
 * **main_metric** - optimization metric. (**accuracy** or **mae**) (str)
 * **convert_to_onnx** - convert to ONNX (bool)
